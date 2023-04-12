@@ -2,29 +2,29 @@ function getTeamsRequest() {
   return fetch("http://localhost:3000/teams-json", {
     method: "GET",
     headers: {
-      "Content-Type": "application/json",
-    },
-  }).then((r) => r.json());
+      "Content-Type": "application/json"
+    }
+  }).then(r => r.json());
 }
 
 function createTeamsRequest(team) {
   return fetch("http://localhost:3000/teams-json/create", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify(team),
-  }).then((r) => r.json());
+    body: JSON.stringify(team)
+  }).then(r => r.json());
 }
 
 function deleteTeamsRequest(id) {
   return fetch("http://localhost:3000/teams-json/delete", {
     method: "DELETE",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify({ id }),
-  }).then((r) => r.json());
+    body: JSON.stringify({ id })
+  }).then(r => r.json());
 }
 
 function getTeamsAsHTML(team) {
@@ -62,14 +62,14 @@ function formSubmit(e) {
     promotion,
     members,
     name: projectName,
-    url: projectUrl,
+    url: projectUrl
   };
   createTeamsRequest(team).then(() => window.location.reload());
 }
 
 function deleteTeam(id) {
   console.log("delete", id);
-  deleteTeamsRequest(id).then((status) => {
+  deleteTeamsRequest(id).then(status => {
     if (status.success) {
       window.location.reload();
     }
@@ -79,7 +79,7 @@ function deleteTeam(id) {
 function initEvents() {
   $("#editForm").addEventListener("submit", formSubmit);
 
-  $("table tbody").addEventListener("click", (e) => {
+  $("table tbody").addEventListener("click", e => {
     if (e.target.matches("a")) {
       const id = e.target.dataset.id;
       deleteTeam(id);
@@ -87,7 +87,7 @@ function initEvents() {
   });
 }
 
-getTeamsRequest().then((teams) => {
+getTeamsRequest().then(teams => {
   showTeams(teams);
 });
 
