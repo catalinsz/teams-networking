@@ -25,3 +25,16 @@ table tr:nth-child(even) {
 input {
   width: 97%;
 }
+
+.link-btn {
+  cursor: pointer;
+  color: #0098b6;
+}
+
+.remove-btn:hover {
+  color: #b90303;
+}
+
+.edit-btn:hover {
+  color: #039903;
+}

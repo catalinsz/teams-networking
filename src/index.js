@@ -1,3 +1,5 @@
+let allTeams = [];
+
 function getTeamsRequest() {
   return fetch("http://localhost:3000/teams-json", {
     method: "GET",
@@ -35,7 +37,8 @@ function getTeamsAsHTML(team) {
         <td>${team.name}</td>
         <td>${team.url}</td>
         <td>
-            <a data-id="${team.id}">✖</a>
+            <a data-id="${team.id}" class="link-btn remove-btn">✖</a>
+            <a data-id="${team.id}" class="link-btn edit-btn">&#9998</a>
         </td>
     </tr>
     `;
@@ -68,7 +71,6 @@ function formSubmit(e) {
 }
 
 function deleteTeam(id) {
-  console.log("delete", id);
   deleteTeamsRequest(id).then(status => {
     if (status.success) {
       window.location.reload();
@@ -76,18 +78,31 @@ function deleteTeam(id) {
   });
 }
 
+function startEdit(id) {
+  const team = allTeams.find(team => team.id === id);
+
+  $("#promotion").value = team.promotion;
+  $("#members").value = team.members;
+  $("#projectName").value = team.name;
+  $("#projectUrl").value = team.url;
+}
+
 function initEvents() {
   $("#editForm").addEventListener("submit", formSubmit);
 
   $("table tbody").addEventListener("click", e => {
-    if (e.target.matches("a")) {
+    if (e.target.matches("a.remove-btn")) {
       const id = e.target.dataset.id;
       deleteTeam(id);
+    } else if (e.target.matches("a.edit-btn")) {
+      const id = e.target.dataset.id;
+      editTeam(id);
     }
   });
 }
 
 getTeamsRequest().then(teams => {
+  allTeams = teams;
   showTeams(teams);
 });
 
