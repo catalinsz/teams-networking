@@ -112,11 +112,30 @@ function startEditTeam(id) {
   $("#projectUrl").value = team.url;
 }
 
+function searchTeams(teams, search) {
+  search = search.toLowerCase();
+  return teams.filter(team => {
+    return (
+      team.members.toLowerCase().includes(search) ||
+      team.promotion.toLowerCase().includes(search) ||
+      team.name.toLowerCase().includes(search) ||
+      team.url.toLowerCase().includes(search)
+    );
+  });
+}
+
 function initEvents() {
   const form = $("#editForm");
   form.addEventListener("submit", formSubmit);
   form.addEventListener("reset", () => {
     editId = undefined;
+  });
+
+  $("#search").addEventListener("input", e => {
+    const search = e.target.value;
+    const teams = searchTeams(allTeams, search);
+    console.table(teams);
+    showTeams(teams);
   });
 
   $("table tbody").addEventListener("click", e => {
