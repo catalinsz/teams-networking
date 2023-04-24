@@ -20,14 +20,23 @@ function createTeamsRequest(team) {
   }).then(r => r.json());
 }
 
-function deleteTeamsRequest(id) {
+function deleteTeamRequest(id, successDelete) {
   return fetch("http://localhost:3000/teams-json/delete", {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ id })
-  }).then(r => r.json());
+  })
+    .then(r => r.json())
+    .then(status => {
+      console.warn("before remove ", status);
+      if (typeof successDelete === "function") {
+        const r = successDelete(status);
+        console.info("raspuns", r);
+      }
+      return status;
+    });
 }
 
 function updateTeamRequest(team) {
@@ -40,19 +49,18 @@ function updateTeamRequest(team) {
   }).then(r => r.json());
 }
 
-function getTeamsAsHTML(team) {
+function getTeamAsHTML(team) {
   return `
-    <tr>
-        <td>${team.promotion}</td>
-        <td>${team.members}</td>
-        <td>${team.name}</td>
-        <td>${team.url}</td>
-        <td>
-            <a data-id="${team.id}" class="link-btn remove-btn">✖</a>
-            <a data-id="${team.id}" class="link-btn edit-btn">&#9998</a>
-        </td>
-    </tr>
-    `;
+  <tr>
+    <td>${team.promotion}</td>
+    <td>${team.members}</td>
+    <td>${team.name}</td>
+    <td>${team.url}</td>
+    <td>
+      <a data-id="${team.id}" class="link-btn remove-btn">✖</a>
+      <a data-id="${team.id}" class="link-btn edit-btn">&#9998;</a>
+    </td>
+  </tr>`;
 }
 
 function showTeams(teams) {
@@ -66,38 +74,55 @@ function $(selector) {
 
 function formSubmit(e) {
   e.preventDefault();
+  //console.warn("submit", e);
 
   const promotion = $("#promotion").value;
   const members = $("#members").value;
-  const projectName = $("#projectName").value;
-  const projectUrl = $("#projectUrl").value;
+  const projectName = $("#name").value;
+  const projectURL = $("#url").value;
 
   const team = {
     promotion,
     members,
     name: projectName,
-    url: projectUrl
+    url: projectURL
   };
+
   if (editId) {
     team.id = editId;
+    console.warn("update...?", editId, team);
     updateTeamRequest(team).then(status => {
+      console.info("updated", status);
       if (status.success) {
-        window.location.reload();
+        //window.location.reload();
+        loadTeams().then(() => {
+          $("#editForm").reset();
+        });
       }
     });
   } else {
-    createTeamsRequest(team).then(status => {
+    createTeamRequest(team).then(status => {
+      console.info("created", status);
       if (status.success) {
-        window.location.reload();
+        // window.location.reload();
+        loadTeams(() => {
+          $("#editForm").reset();
+        });
       }
     });
   }
 }
 
 function deleteTeam(id) {
-  deleteTeamsRequest(id).then(status => {
+  console.warn("delete", id);
+  deleteTeamRequest(id, status => {
+    console.info("callback success", status);
+    return id;
+  }).then(status => {
+    console.warn("status", status);
     if (status.success) {
-      window.location.reload();
+      //window.location.reload();
+      loadTeams();
     }
   });
 }
@@ -132,9 +157,10 @@ function initEvents() {
   });
 
   $("#search").addEventListener("input", e => {
+    //const search = $("#search").value;
     const search = e.target.value;
+    console.info("search", search);
     const teams = searchTeams(allTeams, search);
-    console.table(teams);
     showTeams(teams);
   });
 
@@ -149,9 +175,18 @@ function initEvents() {
   });
 }
 
-getTeamsRequest().then(teams => {
-  allTeams = teams;
-  showTeams(teams);
-});
+function loadTeams(cb) {
+  return getTeamsRequest().then(teams => {
+    //console.warn(this, window);
+    allTeams = teams;
+    showTeams(teams);
+    if (typeof cb === "function") {
+      cb(teams);
+    }
+    return teams;
+  });
+}
+
+loadTeams();
 
 initEvents();
