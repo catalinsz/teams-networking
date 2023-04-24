@@ -52,17 +52,18 @@ function updateTeamRequest(team) {
 }
 
 function getTeamAsHTML(team) {
-  const id = team.id;
-  const url = team.url;
+  // const id = team.id;
+  // const url = team.url;
+  const { id, url, promotion, members, name } = team;
   let displayUrl = url;
   if (url.startsWith("https://")) {
     displayUrl = url.substring(8);
   }
   return `
   <tr>
-    <td>${team.promotion}</td>
-    <td>${team.members}</td>
-    <td>${team.name}</td>
+    <td>${promotion}</td>
+    <td>${members}</td>
+    <td>${name}</td>
     <td><a href="${url}" target="_blank">${displayUrl}</td>
     <td>
       <a data-id="${id}" class="link-btn remove-btn">✖</a>
@@ -176,11 +177,12 @@ function deleteTeam(id) {
 function startEditTeam(id) {
   editId = id;
   const team = allTeams.find(team => team.id === id);
+  const { promotion, members, name, url } = team;
 
-  $("#promotion").value = team.promotion;
-  $("#members").value = team.members;
-  $("#name").value = team.name;
-  $("#url").value = team.url;
+  $("#promotion").value = promotion;
+  $("#members").value = members;
+  $("#name").value = name;
+  $("#url").value = url;
 }
 
 function searchTeams(teams, search) {
