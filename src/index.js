@@ -1,5 +1,5 @@
 let allTeams = [];
-let editId;
+var editId;
 
 function getTeamsRequest() {
   return fetch("http://localhost:3000/teams-json", {
@@ -7,10 +7,12 @@ function getTeamsRequest() {
     headers: {
       "Content-Type": "application/json"
     }
-  }).then(r => r.json());
+  }).then(r => {
+    return r.json();
+  });
 }
 
-function createTeamsRequest(team) {
+function createTeamRequest(team) {
   return fetch("http://localhost:3000/teams-json/create", {
     method: "POST",
     headers: {
@@ -64,7 +66,7 @@ function getTeamAsHTML(team) {
 }
 
 function showTeams(teams) {
-  const html = teams.map(getTeamsAsHTML);
+  const html = teams.map(getTeamAsHTML);
   $("table tbody").innerHTML = html.join("");
 }
 
@@ -128,13 +130,13 @@ function deleteTeam(id) {
 }
 
 function startEditTeam(id) {
-  const team = allTeams.find(team => team.id === id);
   editId = id;
+  const team = allTeams.find(team => team.id === id);
 
   $("#promotion").value = team.promotion;
   $("#members").value = team.members;
-  $("#projectName").value = team.name;
-  $("#projectUrl").value = team.url;
+  $("#name").value = team.name;
+  $("#url").value = team.url;
 }
 
 function searchTeams(teams, search) {
@@ -142,8 +144,8 @@ function searchTeams(teams, search) {
   return teams.filter(team => {
     return (
       team.members.toLowerCase().includes(search) ||
-      team.promotion.toLowerCase().includes(search) ||
       team.name.toLowerCase().includes(search) ||
+      team.promotion.toLowerCase().includes(search) ||
       team.url.toLowerCase().includes(search)
     );
   });
