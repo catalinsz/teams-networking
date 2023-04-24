@@ -107,9 +107,13 @@ function formSubmit(e) {
       console.info("created", status);
       if (status.success) {
         // window.location.reload();
-        loadTeams(() => {
-          $("#editForm").reset();
-        });
+        // loadTeams(() => {
+        //   $("#editForm").reset();
+        // });
+        team.id = status.id;
+        allTeams.push(team);
+        showTeams(allTeams);
+        $("#editForm").reset();
       }
     });
   }
