@@ -109,8 +109,8 @@ async function formSubmit(e) {
   if (editId) {
     team.id = editId;
     console.warn("update...?", editId, team);
-    const status = await updateTeamRequest(team);
-    if (status.success) {
+    const { success } = await updateTeamRequest(team);
+    if (success) {
       allTeams = allTeams.map(t => {
         if (t.id === team.id) {
           return {
@@ -126,9 +126,11 @@ async function formSubmit(e) {
     if (success) {
       team.id = id;
       allTeams = [...allTeams, team];
-      showTeams(allTeams);
-      $("#editForm").reset();
     }
+  }
+  showTeams(allTeams);
+  if (success) {
+    $("#editForm").reset();
   }
 }
 
