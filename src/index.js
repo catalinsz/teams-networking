@@ -94,8 +94,6 @@ function $(selector) {
 
 async function formSubmit(e) {
   e.preventDefault();
-  //console.warn("submit", e);
-
   const promotion = $("#promotion").value;
   const members = $("#members").value;
   const projectName = $("#name").value;
