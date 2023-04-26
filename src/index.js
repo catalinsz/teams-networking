@@ -51,20 +51,17 @@ function updateTeamRequest(team) {
   }).then(r => r.json());
 }
 
-function getTeamAsHTML(team) {
-  // const id = team.id;
-  // const url = team.url;
-  const { id, url, promotion, members, name } = team;
-  let displayUrl = url;
+function getTeamAsHTML({ id, url, promotion, members, name }) {
+  let displayURL = url;
   if (url.startsWith("https://")) {
-    displayUrl = url.substring(8);
+    displayURL = url.substring(8);
   }
   return `
   <tr>
     <td>${promotion}</td>
     <td>${members}</td>
     <td>${name}</td>
-    <td><a href="${url}" target="_blank">${displayUrl}</td>
+    <td><a href="${url}" target="_blank">${displayURL}</a></td>
     <td>
       <a data-id="${id}" class="link-btn remove-btn">✖</a>
       <a data-id="${id}" class="link-btn edit-btn">&#9998;</a>
@@ -76,10 +73,10 @@ let previewDisplayedTeams = [];
 function showTeams(teams) {
   if (teams === previewDisplayedTeams) {
     console.info("same teams");
-    return false;
+    return;
   }
   if (teams.length === previewDisplayedTeams.length) {
-    let eqContent = teams.every((team, index) => team === previewDisplayedTeams[index]);
+    var eqContent = teams.every((t, i) => t === previewDisplayedTeams[i]);
     if (eqContent) {
       console.info("same content");
       return;
@@ -115,14 +112,17 @@ function formSubmit(e) {
     team.id = editId;
     console.warn("update...?", editId, team);
     updateTeamRequest(team).then(status => {
-      console.info("updated", status);
       if (status.success) {
         //window.location.reload();
+        // TODO clone second level.
         // loadTeams().then(() => {
         //   $("#editForm").reset();
         // });
+        // v3
         // allTeams = [...allTeams];
-        // var oldTeam = allTeams.findIndex(t => t.id === team.id);
+        // //allTeams = JSON.parse(JSON.stringify(allTeams)); // deep clone
+        // console.info(allTeams.findIndex(t => t.id === team.id));
+        // var oldTeam = allTeams.find(t => t.id === team.id);
         // oldTeam.promotion = team.promotion;
         // oldTeam.members = team.members;
         // oldTeam.name = team.name;
@@ -131,7 +131,7 @@ function formSubmit(e) {
         allTeams = allTeams.map(t => {
           if (t.id === team.id) {
             return {
-              ...t,
+              ...t, // old props (eg. createdBy, createdAt)
               ...team
             };
           }
@@ -143,15 +143,17 @@ function formSubmit(e) {
       }
     });
   } else {
-    createTeamRequest(team).then(status => {
-      console.info("created", status);
-      if (status.success) {
+    createTeamRequest(team).then(({ success, id }) => {
+      if (success) {
+        // v.1
         // window.location.reload();
+        // v.2
         // loadTeams(() => {
         //   $("#editForm").reset();
         // });
-        team.id = status.id;
-        // allTeams.push(team);
+        // v.3
+        team.id = id;
+        //allTeams.push(team);
         allTeams = [...allTeams, team];
         showTeams(allTeams);
         $("#editForm").reset();
@@ -174,10 +176,9 @@ function deleteTeam(id) {
   });
 }
 
-function startEditTeam(id) {
-  editId = id;
-  const team = allTeams.find(team => team.id === id);
-  const { promotion, members, name, url } = team;
+function startEditTeam(edit) {
+  editId = edit;
+  const { promotion, members, name, url } = allTeams.find(({ id }) => id === edit);
 
   $("#promotion").value = promotion;
   $("#members").value = members;
