@@ -92,7 +92,7 @@ function $(selector) {
   return document.querySelector(selector);
 }
 
-function formSubmit(e) {
+async function formSubmit(e) {
   e.preventDefault();
   //console.warn("submit", e);
 
@@ -111,69 +111,49 @@ function formSubmit(e) {
   if (editId) {
     team.id = editId;
     console.warn("update...?", editId, team);
-    updateTeamRequest(team).then(status => {
-      if (status.success) {
-        //window.location.reload();
-        // TODO clone second level.
-        // loadTeams().then(() => {
-        //   $("#editForm").reset();
-        // });
-        // v3
-        // allTeams = [...allTeams];
-        // //allTeams = JSON.parse(JSON.stringify(allTeams)); // deep clone
-        // console.info(allTeams.findIndex(t => t.id === team.id));
-        // var oldTeam = allTeams.find(t => t.id === team.id);
-        // oldTeam.promotion = team.promotion;
-        // oldTeam.members = team.members;
-        // oldTeam.name = team.name;
-        // oldTeam.url = team.url;
-
-        allTeams = allTeams.map(t => {
-          if (t.id === team.id) {
-            return {
-              ...t, // old props (eg. createdBy, createdAt)
-              ...team
-            };
-          }
-          return t;
-        });
-
-        showTeams(allTeams);
-        $("#editForm").reset();
-      }
-    });
+    const status = await updateTeamRequest(team);
+    if (status.success) {
+      allTeams = allTeams.map(t => {
+        if (t.id === team.id) {
+          return {
+            ...t,
+            ...team
+          };
+        }
+        return t;
+      });
+    }
   } else {
-    createTeamRequest(team).then(({ success, id }) => {
-      if (success) {
-        // v.1
-        // window.location.reload();
-        // v.2
-        // loadTeams(() => {
-        //   $("#editForm").reset();
-        // });
-        // v.3
-        team.id = id;
-        //allTeams.push(team);
-        allTeams = [...allTeams, team];
-        showTeams(allTeams);
-        $("#editForm").reset();
-      }
-    });
+    const { success, id } = await createTeamRequest(team);
+    if (success) {
+      team.id = id;
+      allTeams = [...allTeams, team];
+      showTeams(allTeams);
+      $("#editForm").reset();
+    }
   }
 }
 
-function deleteTeam(id) {
-  console.warn("delete", id);
-  deleteTeamRequest(id, status => {
-    console.info("callback success", status);
-    return id;
-  }).then(status => {
-    console.warn("status", status);
-    if (status.success) {
-      //window.location.reload();
-      loadTeams();
-    }
-  });
+// function deleteTeam(id) {
+//   console.warn("delete", id);
+//   deleteTeamRequest(id, status => {
+//     console.info("callback success", status);
+//     return id;
+//   }).then(status => {
+//     console.warn("status", status);
+//     if (status.success) {
+//       //window.location.reload();
+//       loadTeams();
+//     }
+//   });
+// }
+
+async function deleteTeam(id) {
+  const { success } = await deleteTeamRequest(id);
+  if (success) {
+    allTeams = allTeams.filter(t => t.id !== id);
+    showTeams(allTeams);
+  }
 }
 
 function startEditTeam(edit) {
@@ -225,6 +205,7 @@ function initEvents() {
 }
 
 function loadTeams(cb) {
+  sleep(3000);
   return getTeamsRequest().then(teams => {
     //console.warn(this, window);
     allTeams = teams;
