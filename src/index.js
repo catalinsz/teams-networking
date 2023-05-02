@@ -73,20 +73,23 @@ let previewDisplayedTeams = [];
 function showTeams(teams) {
   if (teams === previewDisplayedTeams) {
     console.info("same teams");
-    return;
+    return false;
   }
   if (teams.length === previewDisplayedTeams.length) {
     var eqContent = teams.every((t, i) => t === previewDisplayedTeams[i]);
     if (eqContent) {
       console.info("same content");
-      return;
+      return false;
     }
   }
 
   previewDisplayedTeams = teams;
   const html = teams.map(getTeamAsHTML);
   $("table tbody").innerHTML = html.join("");
+  return true;
 }
+
+window.showTeams = showTeams;
 
 function $(selector) {
   return document.querySelector(selector);
@@ -94,6 +97,8 @@ function $(selector) {
 
 async function formSubmit(e) {
   e.preventDefault();
+  //console.warn("submit", e);
+
   const promotion = $("#promotion").value;
   const members = $("#members").value;
   const projectName = $("#name").value;
@@ -114,7 +119,7 @@ async function formSubmit(e) {
       allTeams = allTeams.map(t => {
         if (t.id === team.id) {
           return {
-            ...t,
+            ...t, // old props (eg. createdBy, createdAt)
             ...team
           };
         }
@@ -128,27 +133,15 @@ async function formSubmit(e) {
       allTeams = [...allTeams, team];
     }
   }
-  showTeams(allTeams);
-  if (success) {
-    $("#editForm").reset();
-  }
+
+  // if (showTeams(allTeams)) {
+  //   $("#editForm").reset();
+  // }
+  showTeams(allTeams) && $("#editForm").reset();
 }
 
-// function deleteTeam(id) {
-//   console.warn("delete", id);
-//   deleteTeamRequest(id, status => {
-//     console.info("callback success", status);
-//     return id;
-//   }).then(status => {
-//     console.warn("status", status);
-//     if (status.success) {
-//       //window.location.reload();
-//       loadTeams();
-//     }
-//   });
-// }
-
 async function deleteTeam(id) {
+  console.warn("delete", id);
   const { success } = await deleteTeamRequest(id);
   if (success) {
     allTeams = allTeams.filter(t => t.id !== id);
@@ -204,17 +197,15 @@ function initEvents() {
   });
 }
 
-function loadTeams(cb) {
-  sleep(3000);
-  return getTeamsRequest().then(teams => {
-    //console.warn(this, window);
-    allTeams = teams;
-    showTeams(teams);
-    if (typeof cb === "function") {
-      cb(teams);
-    }
-    return teams;
-  });
+async function loadTeams(cb) {
+  const teams = await getTeamsRequest();
+  //console.warn(this, window);
+  allTeams = teams;
+  showTeams(teams);
+  if (typeof cb === "function") {
+    cb(teams);
+  }
+  return teams;
 }
 
 function sleep(ms) {
@@ -225,10 +216,24 @@ function sleep(ms) {
   });
 }
 
-sleep(3000).then(() => {
-  console.info("ready to do %o", "next job");
-});
+(async () => {
+  $("#editForm").classList.add("loading-mask");
+  await loadTeams();
+  await sleep(100);
+  $("#editForm").classList.remove("loading-mask");
 
-loadTeams();
+  console.info("1.start");
+
+  // sleep(4000).then(() => {
+  //   console.info("4.ready to do %o!", "training");
+  // });
+  await sleep(4000);
+  console.info("4.ready to do %o!", "training");
+
+  console.warn("2.after sleep");
+
+  sleep(5000);
+  console.info("3.await sleep");
+})();
 
 initEvents();
