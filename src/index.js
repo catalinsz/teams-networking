@@ -1,3 +1,5 @@
+// import { debounce } from "lodash";
+import { debounce } from "./util";
 import { createTeamRequest, deleteTeamRequest, getTeamsRequest, updateTeamRequest } from "./requests";
 import { $, sleep } from "./util";
 
@@ -134,13 +136,16 @@ function initEvents() {
     editId = undefined;
   });
 
-  $("#search").addEventListener("input", e => {
-    //const search = $("#search").value;
-    const search = e.target.value;
-    console.info("search", search);
-    const teams = searchTeams(allTeams, search);
-    showTeams(teams);
-  });
+  $("#search").addEventListener(
+    "input",
+    debounce(function (e) {
+      const search = e.target.value;
+      const teams = searchTeams(allTeams, search);
+      showTeams(teams);
+    }, 300)
+    // the 3 ways to get the same value
+    // console.info($(#search).value, e.target.value, this)
+  );
 
   $("table tbody").addEventListener("click", e => {
     if (e.target.matches("a.remove-btn")) {
@@ -170,18 +175,18 @@ async function loadTeams(cb) {
   await sleep(100);
   $("#editForm").classList.remove("loading-mask");
 
-  console.info("1.start");
+  // console.info("1.start");
 
-  // sleep(4000).then(() => {
-  //   console.info("4.ready to do %o!", "training");
-  // });
-  await sleep(4000);
-  console.info("4.ready to do %o!", "training");
+  // // sleep(4000).then(() => {
+  // //   console.info("4.ready to do %o!", "training");
+  // // });
+  // await sleep(4000);
+  // console.info("4.ready to do %o!", "training");
 
-  console.warn("2.after sleep");
+  // console.warn("2.after sleep");
 
-  sleep(5000);
-  console.info("3.await sleep");
+  // sleep(5000);
+  // console.info("3.await sleep");
 })();
 
 initEvents();
