@@ -95,10 +95,7 @@ function $(selector) {
   return document.querySelector(selector);
 }
 
-async function formSubmit(e) {
-  e.preventDefault();
-  //console.warn("submit", e);
-
+function getFormValues() {
   const promotion = $("#promotion").value;
   const members = $("#members").value;
   const projectName = $("#name").value;
@@ -110,6 +107,20 @@ async function formSubmit(e) {
     name: projectName,
     url: projectURL
   };
+  return team;
+}
+
+function setFormValues({ promotion, members, name, url }) {
+  $("#promotion").value = promotion;
+  $("#members").value = members;
+  $("#name").value = name;
+  $("#url").value = url;
+}
+
+async function formSubmit(e) {
+  e.preventDefault();
+  //console.warn("submit", e);
+  const team = getFormValues();
 
   if (editId) {
     team.id = editId;
@@ -149,14 +160,10 @@ async function deleteTeam(id) {
   }
 }
 
-function startEditTeam(edit) {
-  editId = edit;
-  const { promotion, members, name, url } = allTeams.find(({ id }) => id === edit);
-
-  $("#promotion").value = promotion;
-  $("#members").value = members;
-  $("#name").value = name;
-  $("#url").value = url;
+function startEditTeam(id) {
+  editId = id;
+  const team = allTeams.find(t => t.id === id);
+  setFormValues(team);
 }
 
 function searchTeams(teams, search) {
