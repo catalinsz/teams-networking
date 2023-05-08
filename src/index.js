@@ -1,5 +1,5 @@
 import { createTeamRequest, deleteTeamRequest, getTeamsRequest, updateTeamRequest } from "./requests";
-import { $, sleep, debounce } from "./util";
+import { $, sleep, debounce, $$ } from "./util";
 
 let allTeams = [];
 var editId;
@@ -12,7 +12,7 @@ function getTeamAsHTML({ id, url, promotion, members, name }) {
   return `
   <tr>
     <td>
-      <input type="checkbox" name="selected" />
+      <input type="checkbox" name="selected" value="${id}"/>
     </td>
     <td>${promotion}</td>
     <td>${members}</td>
@@ -129,16 +129,18 @@ function searchTeams(teams, search) {
   });
 }
 
-function removeSelected() {
-  console.warn("remove selected");
-  $("table tbody").addEventListener("click", e => {
-    console.log(e.target);
-  });
-  // find ids..
-  // add mask..
-  // call deleteTeamReq
-  // remove mask
-  // tre sa gasesc idul cand dau click pe checkbox, sa mor de stiu cum sa il gasesc, sanatate micle
+async function removeSelected() {
+  const checkboxes = $$("#editForm input[name=selected]:checked");
+  const ids = [...checkboxes].map(checkbox => checkbox.value);
+  console.warn("remove", ids);
+  $("#editForm").classList.add("loading-mask");
+
+  const promises = ids.map(id => deleteTeamRequest(id));
+  const results = await Promise.allSettled(promises);
+  console.log(results);
+
+  await loadTeams();
+  $("#editForm").classList.remove("loading-mask");
 }
 
 function initEvents() {
