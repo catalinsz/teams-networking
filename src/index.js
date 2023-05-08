@@ -1,4 +1,3 @@
-// import { debounce } from "lodash";
 import { createTeamRequest, deleteTeamRequest, getTeamsRequest, updateTeamRequest } from "./requests";
 import { $, sleep, debounce } from "./util";
 
@@ -105,7 +104,6 @@ async function formSubmit(e) {
 }
 
 async function deleteTeam(id) {
-  console.warn("delete", id);
   const { success } = await deleteTeamRequest(id);
   if (success) {
     allTeams = allTeams.filter(t => t.id !== id);
@@ -133,10 +131,14 @@ function searchTeams(teams, search) {
 
 function removeSelected() {
   console.warn("remove selected");
+  $("table tbody").addEventListener("click", e => {
+    console.log(e.target);
+  });
   // find ids..
   // add mask..
   // call deleteTeamReq
   // remove mask
+  // tre sa gasesc idul cand dau click pe checkbox, sa mor de stiu cum sa il gasesc, sanatate micle
 }
 
 function initEvents() {
